@@ -9,7 +9,6 @@ import SwiftUI
 
 struct SearchView: View {
     var animation: Namespace.ID
-    
     @EnvironmentObject var homeData: HomeViewModel
     //Activating text field with the help of the FocusState..
     @FocusState var startTF: Bool
@@ -23,6 +22,7 @@ struct SearchView: View {
                     withAnimation{
                         homeData.searchActivated = false
                     }
+                    homeData.searchText = ""
                 }label: {
                     Image(systemName: "arrow.left")
                         .font(.title2)
@@ -51,14 +51,59 @@ struct SearchView: View {
             }
             .padding(.horizontal)
             .padding(.top)
-            NavigationView{
-                StaggeredView(columns: 2, list: homeData.products, content:{ product in
-                    ProductCardView(product: product)
-                })
-                .padding(.horizontal)
+            .padding(.bottom, 10)
+            
+            //Showing progress if searching...
+            // else showing no results found if empty...
+            
+            if let products = homeData.searchedProducts {
+                //if empty
+                if products.isEmpty{
+                    //No results found ...
+                    VStack(spacing: 10){
+                        
+                        Text("Item not found")
+                            .font(.title)
+                            .fontWeight(.bold)
+                            .padding(.top, 20)
+                        
+                        Text("Try a more generic search term or try looking for alternative products ")
+                            .font(.title2)
+                            .foregroundColor(.gray)
+                            .multilineTextAlignment(.center)
+                            .padding(.horizontal, 30)
+                        
+                    }
+                    .padding()
+                }
+                else{
+                    ScrollView(.vertical, showsIndicators: false){
+                        
+                        VStack(spacing: 0){
+                            //found text...
+                            Text("Found \(products.count) results")
+                                .font(.title)
+                                .fontWeight(.bold)
+                                .padding(.vertical)
+                            StaggeredView(columns: 2,spacing: 20, list: products, content:{ products in
+                                ProductCardView(product: products)
+                            })
+                            .padding(.horizontal)
+                            
+                        }
+                        .padding()
+                    }
+                    
+                }
                 
             }
-        }
+                else{
+                    ProgressView()
+                        .padding(.top, 30)
+                        .opacity(homeData.searchText == "" ? 0 : 1)
+                }
+            }
+        
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
         .background(Color(red: 219, green: 217, blue: 217))
      
@@ -76,23 +121,23 @@ struct SearchView: View {
                     Image(product.productImage)
                         .resizable()
                         .aspectRatio(contentMode: .fit)
-                        .frame(width: getRect().width / 2.5, height: getRect().width / 2.5)
-                   
+                        .offset(y: -50)
+                        .padding(.bottom, -50)
                     
                     Text(product.title)
                         .font(.headline)
                         .fontWeight(.semibold)
                         .padding(.top)
                     
-//                    Text(product.subtitle)
-//                        .font(.footnote)
-//                        .foregroundColor(.gray)
+                    Text(product.subtitle)
+                        .font(.footnote)
+                        .foregroundColor(.gray)
                     
-//                    Text(product.price)
-//                        .font(.headline)
-//                        .fontWeight(.bold)
-//                        .foregroundColor(.purple)
-//                        .padding(.top, 5)
+                    Text(product.price)
+                        .font(.headline)
+                        .fontWeight(.bold)
+                        .foregroundColor(.purple)
+                        .padding(.top, 5)
                 }
                 .padding(.horizontal,20)
                 .padding(.bottom,22)
@@ -100,7 +145,9 @@ struct SearchView: View {
                     Color.white
                         .cornerRadius(25)
                 )
+                .padding(.top, 50)
             }
+    
 }
 
     struct SearchView_Previews: PreviewProvider {
