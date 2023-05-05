@@ -14,23 +14,23 @@ struct Home: View {
         ScrollView(.vertical, showsIndicators: false) {
             VStack(spacing: 15) {
                 //Search bar..
-                HStack(spacing: 15){
-                    Image(systemName: "magnifyingglass")
-                        .font(.title2)
-                        .foregroundColor(.gray)
+                ZStack{
                     
-                    TextField("Search", text: .constant(""))
-                        .disabled(true)
+                    if homeData.searchActivated{
+                        SearchBar()
+                    }
+                    else{
+                        SearchBar()
+                            .matchedGeometryEffect(id: "SEARCHBAR", in: animation)
+                    }
                 }
-                .padding(.vertical, 12)
-                .padding(.horizontal)
-                .background(
-                    
-                    Capsule()
-                        .strokeBorder(Color.gray, lineWidth: 0.8)
-                )
                 .frame(width: getRect().width / 1.6)
                 .padding(.horizontal, 25)
+                .onTapGesture{
+                    withAnimation(.easeInOut){
+                        homeData.searchActivated = true
+                    }
+                }
                 Text("Order online\ncollect in store")
                     .font(.title)
                     .fontWeight(.bold)
@@ -85,7 +85,6 @@ struct Home: View {
                 .padding(.top, 10)
             }
             .padding(.vertical)
-            
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(Color.gray.opacity(0.15))
@@ -97,78 +96,108 @@ struct Home: View {
         }content: {
             MoreProductsView()
         }
-    }
         
-        @ViewBuilder
-        func ProductCardView(product: Product) -> some View {
-            VStack(spacing: 10){
-                Image(product.productImage)
-                    .resizable()
-                    .aspectRatio(contentMode: .fit)
-                    .frame(width: getRect().width / 2.5, height: getRect().width / 2.5)
-                //Moving image to top to look like its fixed at half top
-                    .offset(y: -80)
-                    .padding(.bottom, -80)
-                
-                Text(product.title)
-                    .font(.headline)
-                    .fontWeight(.semibold)
-                    .padding(.top)
-                
-                Text(product.subtitle)
-                    .font(.footnote)
-                    .foregroundColor(.gray)
-                
-                Text(product.price)
-                    .font(.headline)
-                    .fontWeight(.bold)
-                    .foregroundColor(.purple)
-                    .padding(.top, 5)
-            }
-            .padding(.horizontal,20)
-            .padding(.bottom,22)
-            .background(
-                Color.white
-                    .cornerRadius(25)
-            )
-        }
-        
-        @ViewBuilder
-        func ProductTypeView(type: ProductType) -> some View {
-            
-            Button {
-                withAnimation{
-                    homeData.productType = type
+        .overlay(
+            ZStack{
+                if homeData.searchActivated{
+                    SearchView(animation: animation)
+                        .environmentObject(homeData)
                 }
             }
-        label: {
-            Text(type.rawValue)
+        )
+    }
+    
+    
+    
+    @ViewBuilder
+    func SearchBar()->some View{
+        HStack(spacing: 15){
+            Image(systemName: "magnifyingglass")
+                .font(.title2)
+                .foregroundColor(.gray)
+            
+            TextField("Search", text: .constant(""))
+                .disabled(true)
+        }
+        .padding(.vertical, 12)
+        .padding(.horizontal)
+        .background(
+            
+            Capsule()
+                .strokeBorder(Color.gray, lineWidth: 0.8)
+        )
+    }
+    
+    @ViewBuilder
+    func ProductCardView(product: Product) -> some View {
+        VStack(spacing: 10){
+            Image(product.productImage)
+                .resizable()
+                .aspectRatio(contentMode: .fit)
+                .frame(width: getRect().width / 2.5, height: getRect().width / 2.5)
+            //Moving image to top to look like its fixed at half top
+                .offset(y: -80)
+                .padding(.bottom, -80)
+            
+            Text(product.title)
                 .font(.headline)
                 .fontWeight(.semibold)
-                .foregroundColor(homeData.productType == type ? Color.purple : Color.gray)
-                .padding(.bottom, 10)
-                .overlay(
-                    ZStack{
-                        if homeData.productType == type{
-                            Capsule()
-                                .fill(Color.purple)
-                                .matchedGeometryEffect(id: "PRODUCTTAB", in: animation)
-                                .frame(height: 2)
-                        }
-                        else {
-                            Capsule()
-                                .fill(Color.clear)
-                                .frame(height: 2)
-                        }
-                    }
-                        .padding(.horizontal, -5)
-                    ,alignment: .bottom
-                )
+                .padding(.top)
             
-        }
+            Text(product.subtitle)
+                .font(.footnote)
+                .foregroundColor(.gray)
             
+            Text(product.price)
+                .font(.headline)
+                .fontWeight(.bold)
+                .foregroundColor(.purple)
+                .padding(.top, 5)
         }
+        .padding(.horizontal,20)
+        .padding(.bottom,22)
+        .background(
+            Color.white
+                .cornerRadius(25)
+        )
     }
+    
+    @ViewBuilder
+    func ProductTypeView(type: ProductType) -> some View {
+        
+        Button {
+            withAnimation{
+                homeData.productType = type
+            }
+        }
+    label: {
+        Text(type.rawValue)
+            .font(.headline)
+            .fontWeight(.semibold)
+            .foregroundColor(homeData.productType == type ? Color.purple : Color.gray)
+            .padding(.bottom, 10)
+            .overlay(
+                ZStack{
+                    if homeData.productType == type{
+                        Capsule()
+                            .fill(Color.purple)
+                            .matchedGeometryEffect(id: "PRODUCTTAB", in: animation)
+                            .frame(height: 2)
+                    }
+                    else {
+                        Capsule()
+                            .fill(Color.clear)
+                            .frame(height: 2)
+                    }
+                }
+                    .padding(.horizontal, -5)
+                ,alignment: .bottom
+            )
+        
+    }
+        
+    }
+}
 
     struct Home_Previews: PreviewProvider {
         static var previews: some View {

@@ -19,7 +19,7 @@ class LoginPageModel: ObservableObject{
     @Published var showReEnterPassword: Bool = false
     
     //Log status
-    @AppStorage("log Status") var log_Status: Bool = false
+    @AppStorage("log_Status") var log_Status: Bool = false
 
     
     func Login() {
