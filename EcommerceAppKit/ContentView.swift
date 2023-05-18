@@ -13,7 +13,7 @@ struct ContentView: View {
     var body: some View {
         Group{
             if log_Status{
-            Home()
+            MainPage()
             }
             else{
                 OnBoardingPage() 

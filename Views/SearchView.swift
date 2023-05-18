@@ -9,6 +9,10 @@ import SwiftUI
 
 struct SearchView: View {
     var animation: Namespace.ID
+    
+    //Shared data...
+    @EnvironmentObject var sharedData: SharedDataModel
+    
     @EnvironmentObject var homeData: HomeViewModel
     //Activating text field with the help of the FocusState..
     @FocusState var startTF: Bool
@@ -23,6 +27,9 @@ struct SearchView: View {
                         homeData.searchActivated = false
                     }
                     homeData.searchText = ""
+                    
+                   //Reseting...
+                    sharedData.fromSearchPage = false
                 }label: {
                     Image(systemName: "arrow.left")
                         .font(.title2)
@@ -118,9 +125,22 @@ struct SearchView: View {
             @ViewBuilder
             func ProductCardView(product: Product) -> some View {
                 VStack(spacing: 10){
-                    Image(product.productImage)
-                        .resizable()
-                        .aspectRatio(contentMode: .fit)
+                    
+                    ZStack{
+                        if sharedData.showDetailProduct{
+                            Image(product.productImage)
+                                .resizable()
+                                .aspectRatio(contentMode: .fit)
+                                .opacity(0)
+                        }
+                        else{
+                            Image(product.productImage)
+                                .resizable()
+                                .aspectRatio(contentMode: .fit)
+                                .matchedGeometryEffect(id: "\(product.id)SEARCH", in: animation)
+                            
+                        }
+                    }
                         .offset(y: -50)
                         .padding(.bottom, -50)
                     
@@ -146,13 +166,20 @@ struct SearchView: View {
                         .cornerRadius(25)
                 )
                 .padding(.top, 50)
+                .onTapGesture {
+                    withAnimation(.easeInOut){
+                        sharedData.fromSearchPage = true
+                        sharedData.detailProduct = product
+                        sharedData.showDetailProduct = true
+                    }
+                }
             }
     
 }
 
     struct SearchView_Previews: PreviewProvider {
         static var previews: some View {
-            Home()
+            MainPage()
         }
     }
     
